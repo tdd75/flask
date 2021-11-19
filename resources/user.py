@@ -5,7 +5,7 @@ from flask_jwt_extended.view_decorators import jwt_required
 from flask_restful import Resource, reqparse
 from blacklist import BLACKLIST
 from models.user import UserModel
-from werkzeug.security import safe_str_cmp
+from hmac import compare_digest
 
 
 _user_parser = reqparse.RequestParser()
@@ -42,7 +42,7 @@ class User(Resource):
         user = UserModel.find_by_id(user_id)
         if user:
             user.delete_from_db()
-            return {'messgae': 'User deleted'}, 200
+            return {'message': 'User deleted'}, 200
         return {'message': 'User not found'}, 404
 
 
@@ -51,7 +51,7 @@ class UserLogin(Resource):
     def post(cls):
         data = _user_parser.parse_args()
         user = UserModel.find_by_username(data['username'])
-        if user and safe_str_cmp(data['password'], user.password):
+        if user and compare_digest(data['password'], user.password):
             access_token = create_access_token(identity=user.id, fresh=True)
             refresh_token = create_refresh_token(user.id)
             return {'access_token': access_token, 'refresh_token': refresh_token}, 200
