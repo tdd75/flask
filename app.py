@@ -1,10 +1,9 @@
 import os
 
-from flask import Flask, jsonify, request
-from flask_restful import Resource, Api
-from flask_jwt_extended import JWTManager, jwt_required
+from flask import Flask
+from flask_restful import Api
+from flask_jwt_extended import JWTManager
 
-from security import authenticate, identity
 from resources.user import UserRegister, User, UserLogin, RefreshToken, UserLogout
 from resources.item import Item, ItemList
 from resources.store import Store, StoreList
@@ -36,14 +35,14 @@ jwt = JWTManager(app)
 
 
 @jwt.additional_claims_loader
-def add_claims_to_access_token(identity):
-    if identity == 1:
+def add_claims_to_access_token(_identity):
+    if _identity == 1:
         return {'is_admin': True}
     return {'is_admin': False}
 
 
 @jwt.token_in_blocklist_loader
-def check_if_token_in_blocklist(header, payload):
+def check_if_token_in_blacklist(_, payload):
     return payload["jti"] in BLACKLIST
 
 
@@ -66,7 +65,7 @@ def invalid_token_callback():
 @jwt.unauthorized_loader
 def missing_token_callback():
     return {
-        'msg': 'Request does not contain an acess token.',
+        'msg': 'Request does not contain an access token.',
         'err': 'invalid_token'
     }, 401
 
