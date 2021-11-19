@@ -2,6 +2,5 @@ flask
 flask_restful
 # flask_jwt
 flask_sqlalchemy
-uwsgi
 psycopg2
 flask_jwt_extended
